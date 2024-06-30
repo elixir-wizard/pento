@@ -10,9 +10,10 @@
 <.table
   id="products"
   rows={@streams.products}
-  row_click={fn {_id, product} -> JS.navigate(~p"/products/#{product}") end}
 >
-  <:col :let={{_id, product}} label="Name"><%= product.name %></:col>
+  <:col :let={{_id, product}} label="Name">
+    <.link navigate={~p"/products/#{product}"} ><%= product.name %></.link>
+  </:col>
   <:col :let={{_id, product}} label="Description"><%= product.description %></:col>
   <:col :let={{_id, product}} label="Unit price"><%= product.unit_price %></:col>
   <:col :let={{_id, product}} label="Sku"><%= product.sku %></:col>

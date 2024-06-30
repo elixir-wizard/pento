@@ -40,4 +40,18 @@ defmodule Pento.CatalogFixtures do
 
     product
   end
+
+  @doc """
+  Generate a category.
+  """
+  def category_fixture(attrs \\ %{}) do
+    {:ok, category} =
+      attrs
+      |> Enum.into(%{
+        name: "some name"
+      })
+      |> Pento.Catalog.create_category()
+
+    category
+  end
 end
