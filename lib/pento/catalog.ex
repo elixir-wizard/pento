@@ -17,8 +17,15 @@ defmodule Pento.Catalog do
       [%Product{}, ...]
 
   """
-  def list_products do
-    Repo.all(Product)
+  def list_products(categories) do
+    query = case categories do
+      [] ->
+        from p in Product
+      _ ->
+        from p in Product, where: p.category_id in ^categories
+    end
+    products = Repo.all(query)
+    Enum.map(products,fn product -> Repo.preload(product, [:category]) end)
   end
 
   @doc """
@@ -35,7 +42,7 @@ defmodule Pento.Catalog do
       ** (Ecto.NoResultsError)
 
   """
-  def get_product!(id), do: Repo.get!(Product, id)
+  def get_product!(id), do: Repo.get!(Product, id) |> Repo.preload([:category])
 
   @doc """
   Creates a product.

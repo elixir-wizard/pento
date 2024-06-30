@@ -6,7 +6,10 @@ defmodule PentoWeb.ProductLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, stream(socket, :products, Catalog.list_products())}
+    {:ok, stream(socket, :products, Catalog.list_products([]))
+    |> assign(:categories, Catalog.list_categories())
+    |> assign(:selected_categories, [])
+  }
   end
 
   @impl true
@@ -34,6 +37,7 @@ defmodule PentoWeb.ProductLive.Index do
 
   @impl true
   def handle_info({PentoWeb.ProductLive.FormComponent, {:saved, product}}, socket) do
+    product = Catalog.get_product!(product.id)
     {:noreply, stream_insert(socket, :products, product)}
   end
 
@@ -43,5 +47,22 @@ defmodule PentoWeb.ProductLive.Index do
     {:ok, _} = Catalog.delete_product(product)
 
     {:noreply, stream_delete(socket, :products, product)}
+  end
+
+  @impl true
+  def handle_event("toggle_category", %{"id" => id}, socket) do
+    IO.puts(id)
+    selected_categories = socket.assigns.selected_categories
+    selected_categories = unless Enum.member?(selected_categories, id) do
+      selected_categories ++ [id]
+    else
+      selected_categories -- [id]
+    end
+
+    IO.inspect(selected_categories)
+    {:noreply, socket
+      |> assign(:selected_categories, selected_categories)
+      |> stream(:products, Catalog.list_products(selected_categories), reset: true)
+    }
   end
 end

@@ -7,33 +7,55 @@
   </:actions>
 </.header>
 
-<.table
-  id="products"
-  rows={@streams.products}
->
-  <:col :let={{_id, product}} label="Name">
-    <.link navigate={~p"/products/#{product}"} ><%= product.name %></.link>
-  </:col>
-  <:col :let={{_id, product}} label="Description"><%= product.description %></:col>
-  <:col :let={{_id, product}} label="Unit price"><%= product.unit_price %></:col>
-  <:col :let={{_id, product}} label="Sku"><%= product.sku %></:col>
-  <:action :let={{_id, product}}>
-    <div class="sr-only">
-      <.link navigate={~p"/products/#{product}"}>Show</.link>
-    </div>
-    <.link patch={~p"/products/#{product}/edit"}>Edit</.link>
-  </:action>
-  <:action :let={{id, product}}>
-    <.link
-      phx-click={JS.push("delete", value: %{id: product.id}) |> hide("##{id}")}
-      data-confirm="Are you sure?"
-    >
-      Delete
-    </.link>
-  </:action>
-</.table>
+<div class="flex flex-row gap-12">
+  <.list>
+    <:item :for={category <- @categories} title="">
+      <.link
+        phx-click={JS.push("toggle_category", value: %{id: category.id})}
+        class={
+          if Enum.member?(@selected_categories, category.id) do
+            "text-blue-500"
+          end
+        }
+      >
+        <%= category.name %>
+      </.link>
+    </:item>
+  </.list>
 
-<.modal :if={@live_action in [:new, :edit]} id="product-modal" show on_cancel={JS.patch(~p"/products")}>
+  <div class="grow">
+    <.table id="products" rows={@streams.products}>
+      <:col :let={{_id, product}} label="Name">
+        <.link navigate={~p"/products/#{product}"}><%= product.name %></.link>
+      </:col>
+      <:col :let={{_id, product}} label="Description"><%= product.description %></:col>
+      <:col :let={{_id, product}} label="Unit price"><%= product.unit_price %></:col>
+      <:col :let={{_id, product}} label="Sku"><%= product.sku %></:col>
+      <:col :let={{_id, product}} label="Category"><%= product.category.name %></:col>
+      <:action :let={{_id, product}}>
+        <div class="sr-only">
+          <.link navigate={~p"/products/#{product}"}>Show</.link>
+        </div>
+        <.link patch={~p"/products/#{product}/edit"}>Edit</.link>
+      </:action>
+      <:action :let={{id, product}}>
+        <.link
+          phx-click={JS.push("delete", value: %{id: product.id}) |> hide("##{id}")}
+          data-confirm="Are you sure?"
+        >
+          Delete
+        </.link>
+      </:action>
+    </.table>
+  </div>
+</div>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="product-modal"
+  show
+  on_cancel={JS.patch(~p"/products")}
+>
   <.live_component
     module={PentoWeb.ProductLive.FormComponent}
     id={@product.id || :new}
