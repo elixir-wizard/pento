@@ -22,6 +22,7 @@ defmodule PentoWeb.Router do
 
     live "/", PageLive, :home
     live "/guess", WrongLive
+    live "/tictactoe", TictactoeLive
 
     live "/products", ProductLive.Index, :index
     live "/products/new", ProductLive.Index, :new
